@@ -99,7 +99,6 @@ spec:
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--cloud-config=$(CLOUD_CONFIG)"
             - "--cluster=$(CLUSTER_NAME)"
-            - "--pvc-annotations"
             - "--v=1"
           env:
             - name: CSI_ENDPOINT
@@ -126,12 +125,14 @@ spec:
             - name: socket-dir
               mountPath: /csi
             - name: secret-cinderplugin
-              mountPath: /etc/config
+              mountPath: /etc/config/cloud.conf
+              subPath: cloud.conf
               readOnly: true
-            # - name: cacert
-            #   mountPath: /etc/cacert
-            #   readOnly: true
-      volumes:
+            - name: secret-cinderplugin
+              mountPath: /etc/config/clouds.yaml
+              subPath: clouds.yaml
+              readOnly: true
+      volumes:        
         - name: socket-dir
           emptyDir:
         - name: secret-cinderplugin
