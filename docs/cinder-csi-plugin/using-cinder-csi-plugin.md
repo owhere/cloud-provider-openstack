@@ -56,7 +56,7 @@ In addition to the standard set of klog flags, `cinder-csi-plugin` accepts the f
 <dl>
   <dt>--nodeid &lt;node id&gt;</dt>
   <dd>
-  This argument is deprecated, will be removed in future.
+  This argument is deprecated. It will be removed in future.
 
   An identifier for the current node which will be used in OpenStack API calls.  This can be either the UUID or name of the OpenStack server, but note that if using name it must be unique.
   </dd>
@@ -68,6 +68,13 @@ In addition to the standard set of klog flags, `cinder-csi-plugin` accepts the f
   The endpoint of the gRPC server agents will use to connect to this CSI plugin, typically a local unix socket.
 
   The manifests default this to `unix://csi/csi.sock`, which is supplied via the `CSI_ENDPOINT` environment variable.
+  </dd>
+
+  <dt>--with-topology &lt;enabled&gt;</dt>
+  <dd>
+  If set to true then the CSI driver reports topology information and the controller respects it.
+
+  Defaults to `true` (enabled).
   </dd>
 
   <dt>--cloud-config &lt;config file&gt; [--cloud-config &lt;config file&gt; ...]</dt>
@@ -101,16 +108,17 @@ In addition to the standard set of klog flags, `cinder-csi-plugin` accepts the f
 
   <dt>--provide-controller-service &lt;enabled&gt;</dt>
   <dd>
-  If set to true then the CSI driver does provide the controller service.
+  If set to true then the CSI driver provides the controller service.
 
-  The default is to provide the controller service.
+  Defaults to `true` (enabled).
   </dd>
 
   <dt>--provide-node-service &lt;enabled&gt;</dt>
   <dd>
-  If set to true then the CSI driver does provide the node service.
+  If set to true then the CSI driver provides the node service.
 
-  The default is to provide the node service.
+  Defaults to `true` (enabled).
+  </dd>
 
   <dt>--pvc-annotations &lt;disabled&gt;</dt>
   <dd>
@@ -118,7 +126,7 @@ In addition to the standard set of klog flags, `cinder-csi-plugin` accepts the f
   scheduler hints. See [Supported PVC Annotations](#supported-pvc-annotations)
   for more information.
 
-  The default is not to provide the PVC annotations support.
+  Defaults to `false` (disabled).
   </dd>
 </dl>
 
@@ -334,8 +342,6 @@ Run sanity tests for cinder CSI driver using:
 ```
 $ make test-cinder-csi-sanity
 ```
-
-Optionally, to test the driver csc tool could be used. please refer, [usage guide](./csc-tool.md) for more info.
 
 ## In-tree Cinder provisioner to cinder CSI Migration
 

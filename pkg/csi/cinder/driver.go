@@ -63,39 +63,45 @@ type CinderDriver = Driver
 //revive:enable:exported
 
 type Driver struct {
-	name      string
-	fqVersion string //Fully qualified version in format {Version}@{CPO version}
-	endpoint  string
-	cluster   string
+	name         string
+	fqVersion    string //Fully qualified version in format {Version}@{CPO version}
+	endpoint     string
+	clusterID    string
+	withTopology bool
 
-	ids       *identityServer
-	cs        *controllerServer
-	ns        *nodeServer
-	pvcLister v1.PersistentVolumeClaimLister
+	ids *identityServer
+	cs  *controllerServer
+	ns  *nodeServer
 
 	vcap  []*csi.VolumeCapability_AccessMode
 	cscap []*csi.ControllerServiceCapability
 	nscap []*csi.NodeServiceCapability
+
+	pvcLister v1.PersistentVolumeClaimLister
 }
 
 type DriverOpts struct {
-	ClusterID string
-	Endpoint  string
+	ClusterID    string
+	Endpoint     string
+	WithTopology bool
+
 	PVCLister v1.PersistentVolumeClaimLister
 }
 
 func NewDriver(o *DriverOpts) *Driver {
 	d := &Driver{
-		name:      driverName,
-		fqVersion: fmt.Sprintf("%s@%s", Version, version.Version),
-		endpoint:  o.Endpoint,
-		cluster:   o.ClusterID,
-		pvcLister: o.PVCLister,
+		name:         driverName,
+		fqVersion:    fmt.Sprintf("%s@%s", Version, version.Version),
+		endpoint:     o.Endpoint,
+		clusterID:    o.ClusterID,
+		withTopology: o.WithTopology,
+		pvcLister:    o.PVCLister,
 	}
 
 	klog.Info("Driver: ", d.name)
 	klog.Info("Driver version: ", d.fqVersion)
 	klog.Info("CSI Spec version: ", specVersion)
+	klog.Infof("Topology awareness: %T", d.withTopology)
 
 	d.AddControllerServiceCapabilities(
 		[]csi.ControllerServiceCapability_RPC_Type{

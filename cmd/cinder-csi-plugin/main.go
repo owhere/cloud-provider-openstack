@@ -43,6 +43,7 @@ var (
 	provideControllerService bool
 	provideNodeService       bool
 	noClient                 bool
+	withTopology             bool
 )
 
 func main() {
@@ -76,7 +77,7 @@ func main() {
 	csi.AddPVCFlags(cmd)
 
 	cmd.PersistentFlags().StringVar(&nodeID, "nodeid", "", "node id")
-	if err := cmd.PersistentFlags().MarkDeprecated("nodeid", "This flag would be removed in future. Currently, the value is ignored by the driver"); err != nil {
+	if err := cmd.PersistentFlags().MarkDeprecated("nodeid", "This option is now ignored by the driver. It will be removed in a future release."); err != nil {
 		klog.Fatalf("Unable to mark flag nodeid to be deprecated: %v", err)
 	}
 
@@ -86,6 +87,8 @@ func main() {
 	}
 
 	cmd.Flags().StringSliceVar(&cloudConfig, "cloud-config", nil, "CSI driver cloud config. This option can be given multiple times")
+
+	cmd.PersistentFlags().BoolVar(&withTopology, "with-topology", true, "cluster is topology-aware")
 
 	cmd.PersistentFlags().StringSliceVar(&cloudNames, "cloud-name", []string{""}, "Cloud name to instruct CSI driver to read additional OpenStack cloud credentials from the configuration subsections. This option can be specified multiple times to manage multiple OpenStack clouds.")
 	cmd.PersistentFlags().StringToStringVar(&additionalTopologies, "additional-topology", map[string]string{}, "Additional CSI driver topology keys, for example topology.kubernetes.io/region=REGION1. This option can be specified multiple times to add multiple additional topology keys.")
@@ -107,9 +110,10 @@ func main() {
 func handle() {
 	// Initialize cloud
 	d := cinder.NewDriver(&cinder.DriverOpts{
-		Endpoint:  endpoint,
-		ClusterID: cluster,
-		PVCLister: csi.GetPVCLister(),
+		Endpoint:     endpoint,
+		ClusterID:    cluster,
+		PVCLister:    csi.GetPVCLister(),
+		WithTopology: withTopology,
 	})
 
 	openstack.InitOpenStackProvider(cloudConfig, httpEndpoint)
@@ -129,7 +133,7 @@ func handle() {
 	}
 
 	if provideNodeService {
-		//Initialize mount
+		// Initialize mount
 		mount := mount.GetMountProvider()
 
 		cfg, err := openstack.GetConfigFromFiles(cloudConfig)
@@ -138,7 +142,7 @@ func handle() {
 			return
 		}
 
-		//Initialize Metadata
+		// Initialize Metadata
 		metadata := metadata.GetMetadataProvider(cfg.Metadata.SearchOrder)
 
 		d.SetupNodeService(mount, metadata, cfg.BlockStorage, additionalTopologies)
