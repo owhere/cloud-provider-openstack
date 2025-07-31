@@ -1545,9 +1545,9 @@ func (lbaas *LbaasV2) makeSvcConf(ctx context.Context, serviceName string, servi
 	svcConf.nodeSelectors = getKeyValueFromServiceAnnotation(service, ServiceAnnotationLoadBalancerNodeSelector, lbaas.opts.NodeSelector)
 	for key, value := range svcConf.nodeSelectors {
 		if value == "" {
-			klog.V(3).InfoS("Target node label %s key is set to LoadBalancer service %s", key, serviceName)
+			klog.V(3).Infof("Target node label %s key is set to LoadBalancer service %s", key, serviceName)
 		} else {
-			klog.V(3).InfoS("Target node label %s=%s is set to LoadBalancer service %s", key, value, serviceName)
+			klog.V(3).Infof("Target node label %s=%s is set to LoadBalancer service %s", key, value, serviceName)
 		}
 	}
 
@@ -1699,7 +1699,7 @@ func (lbaas *LbaasV2) ensureOctaviaLoadBalancer(ctx context.Context, clusterName
 			lbaas.eventRecorder.Eventf(service, corev1.EventTypeWarning, eventLBRename, msg, loadbalancer.ID, loadbalancer.Name, lbName)
 			loadbalancer, err = renameLoadBalancer(ctx, lbaas.lb, loadbalancer, lbName, clusterName)
 			if err != nil {
-				return nil, fmt.Errorf("failed to update load balancer %s with an updated name", svcConf.lbID)
+				return nil, fmt.Errorf("failed to update load balancer %s with an updated name: %w", svcConf.lbID, err)
 			}
 		}
 

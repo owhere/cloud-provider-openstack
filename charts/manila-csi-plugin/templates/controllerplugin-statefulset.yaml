@@ -2,6 +2,7 @@ kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: {{ include "openstack-manila-csi.controllerplugin.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "openstack-manila-csi.controllerplugin.labels" .  | nindent 4 }}
 spec:
@@ -15,6 +16,7 @@ spec:
       labels:
         {{- include "openstack-manila-csi.controllerplugin.labels" .  | nindent 8 }}
     spec:
+      securityContext: {{ toYaml .Values.controllerplugin.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "openstack-manila-csi.serviceAccountName.controllerplugin" . }}
       containers:
         {{- range .Values.shareProtocols }}
@@ -130,6 +132,9 @@ spec:
               mountPath: /runtimeconfig
               readOnly: true
             {{- end }}
+            {{- with $.Values.controllerplugin.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           resources:
 {{ toYaml $.Values.controllerplugin.nodeplugin.resources | indent 12 }}
         {{- end }}
@@ -153,6 +158,9 @@ spec:
           hostPath:
             path: /var/lib/kubelet/pods
             type: Directory
+        {{- with .Values.controllerplugin.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     {{- if .Values.controllerplugin.affinity }}
       affinity: {{ toYaml .Values.controllerplugin.affinity | nindent 8 }}
     {{- end }}
